@@ -1,0 +1,63 @@
+﻿在某些情况下，可能会存在多个同名的进程。要通过进程名获取全部的PID（进程ID），您可以使用操作系统特定的函数或工具来实现。
+
+以下是在不同操作系统上获取多个同名进程PID的示例：
+
+**Windows:**
+
+```c
+#include <windows.h>
+#include <tlhelp32.h>
+#include <stdio.h>
+
+void GetAllProcessIdsByName(const char* processName) {
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        printf("无法创建进程快照。错误码：%lu\n", GetLastError());
+        return;
+    }
+
+    PROCESSENTRY32 pe;
+    pe.dwSize = sizeof(PROCESSENTRY32);
+
+    if (Process32First(hSnapshot, &pe)) {
+        do {
+            if (strcmp(processName, pe.szExeFile) == 0) {
+                printf("进程名：%s，PID：%lu\n", pe.szExeFile, pe.th32ProcessID);
+            }
+        } while (Process32Next(hSnapshot, &pe));
+    }
+
+    CloseHandle(hSnapshot);
+}
+
+int main() {
+    const char* processName = "example.exe"; // 替换为目标进程的名称
+    GetAllProcessIdsByName(processName);
+    return 0;
+}
+```
+
+上述示例使用了Windows API中的`CreateToolhelp32Snapshot`和`Process32First`、`Process32Next`等函数来获取进程快照信息，并遍历找到与指定进程名匹配的进程。
+
+**Linux:**
+
+```c
+#include <stdio.h>
+#include <dirent.h>
+#include <string.h>
+#include <unistd.h>
+
+void GetAllProcessIdsByName(const char* processName) {
+    DIR* dir = opendir("/proc");
+    if (dir == NULL) {
+        printf("无法打开/proc目录。\n");
+        return;
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_type == DT_DIR) {
+            char path[256];
+            snprintf(path, sizeof(path), "/proc/%s/comm", entry->d_name);
+
+            FILE* file = fopen(path
