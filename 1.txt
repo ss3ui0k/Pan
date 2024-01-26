@@ -1,0 +1,47 @@
+﻿当使用C#编程时，你可以使用`Directory.GetFiles`方法来获取指定文件夹下的所有文件，然后使用 `Path.GetFileName` 方法提取文件名部分，最后使用条件语句来检查文件名是否包含特定的字符串并将其添加到列表中。以下是一个示例代码：
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string folderPath = @"C:\YourFolderPath";
+        string[] searchPatterns = { "file1", "file2", "file3" };
+
+        List<string> fileList = GetFilesWithNames(folderPath, searchPatterns);
+
+        foreach (string file in fileList)
+        {
+            Console.WriteLine(file);
+        }
+    }
+
+    static List<string> GetFilesWithNames(string folderPath, string[] searchPatterns)
+    {
+        List<string> fileList = new List<string>();
+
+        foreach (string searchPattern in searchPatterns)
+        {
+            string[] files = Directory.GetFiles(folderPath, "*" + searchPattern + "*");
+
+            foreach (string file in files)
+            {
+                string fileName = Path.GetFileName(file);
+
+                if (fileName.Contains(searchPattern))
+                {
+                    fileList.Add(file);
+                }
+            }
+        }
+
+        return fileList;
+    }
+}
+```
+
+请将`folderPath`变量的值替换为你想要遍历的文件夹的路径，并将`searchPatterns`数组替换为你要检查的文件名模式。代码将返回符合条件的文件列表，并在控制台上显示文件路径。
